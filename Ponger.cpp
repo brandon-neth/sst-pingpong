@@ -9,12 +9,12 @@ class BallEvent : public SST::Event {
   public:
     BallEvent() : SST::Event(), count(0) { }
     BallEvent(int64_t cnt) : SST::Event(), count(cnt) { }
-    
+
     int64_t count;
 
-    void serialize_order(SST::Core::Serialization::serializer &ser)  override {
+    void serialize_order(SST::Core::Serialization::serializer &ser) override {
       Event::serialize_order(ser);
-      ser & count;
+      SST_SER(count);
     }
 
     // Register this event as serializable
@@ -37,16 +37,19 @@ Ponger::Ponger( SST::ComponentId_t id, SST::Params& params )
   ballsHeadingWest  = params.find<int64_t>("ballsHeadingWest",  0);
   ballsHeadingEast  = params.find<int64_t>("ballsHeadingEast",  0);
 
-  northPort = configureLink("northPort", new SST::Event::Handler<Ponger>(this, &Ponger::handleNorthPort));
-  southPort = configureLink("southPort", new SST::Event::Handler<Ponger>(this, &Ponger::handleSouthPort));
-  westPort  = configureLink("westPort",  new SST::Event::Handler<Ponger>(this, &Ponger::handleWestPort));
-  eastPort  = configureLink("eastPort",  new SST::Event::Handler<Ponger>(this, &Ponger::handleEastPort));
+  northPort = configureLink("northPort", new SST::Event::Handler2<Ponger, &Ponger::handleNorthPort>(this));
+  southPort = configureLink("southPort", new SST::Event::Handler2<Ponger, &Ponger::handleSouthPort>(this));
+  westPort  = configureLink("westPort",  new SST::Event::Handler2<Ponger, &Ponger::handleWestPort>(this));
+  eastPort  = configureLink("eastPort",  new SST::Event::Handler2<Ponger, &Ponger::handleEastPort>(this));
 
 
 #ifdef ENABLE_SSTDBG
   dbg = new SSTDebug(getName(),"./");
 #endif
 }
+#ifdef ENABLE_SSTCHECKPOINT
+  Ponger::Ponger() { }
+#endif
 
 Ponger::~Ponger() {
 #ifdef ENABLE_SSTDBG
@@ -164,5 +167,23 @@ void Ponger::printStatus(SST::Output& out){
   {
     out.output("Debug dump failed!\n");
   }
+}
+#endif
+
+#ifdef ENABLE_SSTCHECKPOINT
+void Ponger::serialize_order(SST::Core::Serialization::serializer& ser) {
+  SST::Component::serialize_order(ser);
+  SST_SER(ballsHeadingNorth)
+  SST_SER(ballsHeadingSouth)
+  SST_SER(ballsHeadingWest)
+  SST_SER(ballsHeadingEast)
+  SST_SER(northPort)
+  SST_SER(southPort)
+  SST_SER(westPort)
+  SST_SER(eastPort)
+
+  #ifdef ENABLE_SSTDBG
+    SST_SER(dbg)
+  #endif
 }
 #endif
