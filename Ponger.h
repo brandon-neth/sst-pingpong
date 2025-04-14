@@ -35,7 +35,7 @@ class Ponger : public SST::Component {
      { "ballsHeadingNorth", "Balls currently heading north", "0" },
      { "ballsHeadingSouth", "Balls currently heading south", "0" },
      { "ballsHeadingWest",  "Balls currently heading west",  "0" },
-     { "ballsHeadingEast",  "Balls currently heading east",  "0" } 
+     { "ballsHeadingEast",  "Balls currently heading east",  "0" }
     )
 
     // Port name, description, event type
@@ -45,6 +45,14 @@ class Ponger : public SST::Component {
       { "westPort" , "Port to west",  {"pingpong.BallEvent"}},
       { "eastPort",  "Port to east",  {"pingpong.BallEvent"}}
     )
+
+  #ifdef ENABLE_SSTCHECKPOINT
+    // needed for serialization
+    Ponger();
+    // needed for serialization
+    void serialize_order(SST::Core::Serialization::serializer& ser) override;
+    ImplementSerializable(Ponger)
+  #endif
 
 
 #ifdef ENABLE_SSTDBG
@@ -61,7 +69,7 @@ class Ponger : public SST::Component {
     int64_t ballsHeadingSouth;
     int64_t ballsHeadingWest;
     int64_t ballsHeadingEast;
-    
+
 
     SST::Link *northPort, *southPort, *westPort, *eastPort;
 

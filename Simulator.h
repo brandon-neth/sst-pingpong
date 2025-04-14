@@ -46,6 +46,13 @@ class Simulator : public SST::Component {
 #ifdef ENABLE_SSTDBG
     SSTDebug *dbg;
 #endif
+  #ifdef ENABLE_SSTCHECKPOINT
+  // needed for serialization
+  Simulator();
+  void serialize_order(SST::Core::Serialization::serializer& ser) override;
+  ImplementSerializable(Simulator)
+  #endif
+
 };
 
 #endif
