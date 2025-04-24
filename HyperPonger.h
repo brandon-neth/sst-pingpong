@@ -259,6 +259,14 @@ class HyperPonger : public SST::Component {
       { "port_199", "199th port to neighboring grid", {"pingpong.BallEvent"}}
     )
 
+  #ifdef ENABLE_SSTCHECKPOINT
+    // needed for serialization
+    HyperPonger();
+    // needed for serialization
+    void serialize_order(SST::Core::Serialization::serializer& ser) override;
+    ImplementSerializable(HyperPonger)
+  #endif
+
   private:
     void sendOutRandomBall();
 
@@ -267,7 +275,7 @@ class HyperPonger : public SST::Component {
 
     SST::Output out;
     SST::Link *linkN, *linkS, *linkW, *linkE;
-    SST::Link *hyperLink[200];
+    SST::Link *hyperLink[200]; /* if this count changes, be sure to update loop in serialize_order*/
 };
 
 #endif
